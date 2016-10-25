@@ -102,7 +102,7 @@ db.transaction(['entries'], 'r', function* () {
 #### Indexes
 
 An object store can also be queried by any of it's indexes, just like
-nomral IndexedDB. An example:
+normal IndexedDB. An example:
 
 ```js
 db.transaction(['entries'], 'r', function* () {
