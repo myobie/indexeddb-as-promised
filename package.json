@@ -9,15 +9,6 @@
     "tape-run": "browserify tests/*.js -t [ babelify ] -d | tape-run",
     "watch": "watch 'npm t'"
   },
-  "browserify": {
-    "transform": [
-      "babelify"
-    ]
-  },
-  "testling": {
-    "browsers": "safari/latest",
-    "files": "tests/**/*.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/myobie/indexeddb-as-promised.git"
