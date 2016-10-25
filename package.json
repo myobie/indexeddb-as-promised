@@ -4,7 +4,19 @@
   "description": "IndexedDB wrapper to use Promise as the async primitive instead of callbacks",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "standard `git ls-files *.js`",
+    "test": "npm run lint && npm run tape-run",
+    "tape-run": "browserify tests/*.js -t [ babelify ] -d | tape-run",
+    "watch": "watch 'npm t'"
+  },
+  "browserify": {
+    "transform": [
+      "babelify"
+    ]
+  },
+  "testling": {
+    "browsers": "safari/latest",
+    "files": "tests/**/*.js"
   },
   "repository": {
     "type": "git",
@@ -19,5 +31,15 @@
   "bugs": {
     "url": "https://github.com/myobie/indexeddb-as-promised/issues"
   },
-  "homepage": "https://github.com/myobie/indexeddb-as-promised#readme"
+  "homepage": "https://github.com/myobie/indexeddb-as-promised#readme",
+  "devDependencies": {
+    "babel-plugin-transform-async-to-generator": "^6.16.0",
+    "babel-register": "^6.18.0",
+    "babelify": "^7.3.0",
+    "blue-tape": "^1.0.0",
+    "browserify": "^13.1.1",
+    "standard": "^8.4.0",
+    "tape-run": "^2.1.4",
+    "watch": "^1.0.1"
+  }
 }

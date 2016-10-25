@@ -25,8 +25,8 @@ if (idb.isSupported()) {
 
     if (up.oldVersion < 2) {
       const folders = up.createObjectStore('folders', { keyPath: 'id' })
-      folders.createIndex('entryId')
       folders.createIndex('createdAt')
+      up.objectStore('entries').createIndex('folderId')
     }
   }).then(db => console.log(db))
 }
