@@ -44,6 +44,11 @@ An `Upgrader` provides:
 * `deleteObjectStore`
 * `objectStore`
 
+And an object store inside an `Upgrader` provides:
+
+* `createIndex`
+* `deleteIndex`
+
 ### Transactions
 
 To read or write to the database, one must first start a transaction.
