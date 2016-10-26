@@ -36,10 +36,18 @@ class ObjectStore {
   }
 
   getAll (query, amount) {
+    if (typeof query === 'number') {
+      amount = query
+      query = undefined
+    }
     return new Request(() => this._objectStore.getAll(query, amount), this)
   }
 
   getAllKeys (query, amount) {
+    if (typeof query === 'number') {
+      amount = query
+      query = undefined
+    }
     return new Request(() => this._objectStore.getAllKeys(query, amount), this)
   }
 
@@ -48,12 +56,28 @@ class ObjectStore {
     return new ObjectStoreIndex(_index, this)
   }
 
-  openCursor (range, direction) {
-    return new CursorRequest(() => this._objectStore.openCursor(range, direction), this)
+  openCursor (range, direction, genFn) {
+    if (typeof range === 'function' && !direction && !genFn) {
+      genFn = range
+      range = undefined
+    }
+    if (range && typeof direction === 'function' && !genFn) {
+      genFn = direction
+      direction = undefined
+    }
+    return new CursorRequest(() => this._objectStore.openCursor(range, direction), genFn, this)
   }
 
-  openKeyCursor (range, direction) {
-    return new CursorRequest(() => this._objectStore.openKeyCursor(range, direction), this)
+  openKeyCursor (range, direction, genFn) {
+    if (typeof range === 'function' && !direction && !genFn) {
+      genFn = range
+      range = undefined
+    }
+    if (range && typeof direction === 'function' && !genFn) {
+      genFn = direction
+      direction = undefined
+    }
+    return new CursorRequest(() => this._objectStore.openKeyCursor(range, direction), genFn, this)
   }
 
   put (item, key) {

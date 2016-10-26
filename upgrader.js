@@ -36,7 +36,14 @@ class UpgradingObjectStore {
     this._objectStore = _objectStore
   }
 
-  createIndex (name, keyPath, opts) {
+  createIndex (name, keyPath = undefined, opts) {
+    keyPath || (keyPath = name)
+
+    opts || (opts = {})
+    if (opts.unique === undefined) {
+      opts.unique = false
+    }
+
     this._objectStore.createIndex(name, keyPath, opts)
   }
 

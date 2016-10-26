@@ -20,10 +20,18 @@ class ObjectStoreIndex {
   }
 
   getAll (query, amount) {
+    if (typeof query === 'number') {
+      amount = query
+      query = undefined
+    }
     return new Request(() => this._index.getAll(query, amount), this)
   }
 
   getAllKeys (query, amount) {
+    if (typeof query === 'number') {
+      amount = query
+      query = undefined
+    }
     return new Request(() => this._index.getAllKeys(query, amount), this)
   }
 
@@ -31,11 +39,27 @@ class ObjectStoreIndex {
     return new Request(() => this._index.getKey(key), this)
   }
 
-  openCursor (range, direction) {
+  openCursor (range, direction, genFn) {
+    if (typeof range === 'function' && !direction && !genFn) {
+      genFn = range
+      range = undefined
+    }
+    if (range && typeof direction === 'function' && !genFn) {
+      genFn = direction
+      direction = undefined
+    }
     return new CursorRequest(() => this._index.openCursor(range, direction), this)
   }
 
-  openKeyCursor (range, direction) {
+  openKeyCursor (range, direction, genFn) {
+    if (typeof range === 'function' && !direction && !genFn) {
+      genFn = range
+      range = undefined
+    }
+    if (range && typeof direction === 'function' && !genFn) {
+      genFn = direction
+      direction = undefined
+    }
     return new CursorRequest(() => this._index.openKeyCursor(range, direction), this)
   }
 

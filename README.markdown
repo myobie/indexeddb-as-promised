@@ -142,39 +142,39 @@ updateEntry(123, { subject: 'Hello' })
 
 #### Cursors
 
-_NOTE: this probalby won't work out._
-
 Cursors are tricky, becuase they emit `success` over and over on the
 same `IDBRequest` until they are finished. In this library cursor
-methods return a `CursorRequest` which is a special request which
-resoles a promise with a `Cursor` that knows how to iterate through the
-results. An example:
+methods return a `CursorRequest`. An example:
 
 ```js
 db.transaction(['folders'], 'r', function* () {
-  const cursor = yield this.folders.openCursor()
-  const first = cursor.next()
-  const second = cursor.next()
-  return [first, second]
+  const firstTwo = yield this.folders.openCursor(function* (cursor) {
+    const item1 = cursor.value
+    cursor = yield
+    const item2 = cursor.value
+    return [item1, item2]
+  })
+  return firstTwo
 })
 ```
 
-`Cursor`s also implement the `iterator` method so they work with `for
-... of`:
+Another example:
 
 ```js
 function eachFolder (cb) {
-  db.transaction(['folders'], 'r', function* () {
-    const cursor = yield this.folders.openCursor()
-    for (let folder of cursor) {
-      cb(folder)
-    }
+  return db.transaction(['folders'], 'r', function* () {
+    yield this.folders.openCursor(function* (cursor) {
+      while(cursor = yield) {
+        let folder = cursor.value
+        if (folder.isReady) { cb(folder) }
+      }
+    }))
   })
 }
 
 // ... somewhere else
 
-eachFolder(folder => html`<li>${folder.name}</li>`)
+eachFolder(folder => output(html`<li>${folder.name}</li>`))
 ```
 
 This should allow for any kind of filters or accumulation that one can

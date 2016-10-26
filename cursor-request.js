@@ -1,6 +1,9 @@
+class GeneratorNeverFinishedError extends Error {}
+
 class CursorRequest {
-  constructor (factory, source) {
+  constructor (factory, genFn, source) {
     this.factory = factory
+    this.genFn = genFn
     this.source = source
     this.isRequest = true
 
@@ -8,30 +11,15 @@ class CursorRequest {
     this._cb = null
   }
 
-  runNewRequest () {
-  }
-
-  runExistingRequest () {
-  }
-
-  getEach () {
-    this.db.transaction(['items'], 'r').run(function* (tx) {
-      const cursor = yield this.items.openCursor()
-      let items = []
-      for (let item of cursor) {
-        item.push(item)
-      }
-      return items
-    })
-  }
-
   // There is no way this is going to work, but I wanted to at least get my idea down in psuedo code
   run () {
     const source = this.source
-    let _request
-    let cursor
+    const genFn = this.genFn
 
     return new Promise((resolve, reject) => {
+      let _request
+      let gen
+
       try {
         _request = this.factory()
       } catch (e) {
@@ -44,40 +32,60 @@ class CursorRequest {
       _request.onsuccess = e => {
         const _cursor = e.target.result
 
-        if (cursor) {
-          if (_cursor) {
-            cursor.currentValue = {
-              key: _cursor.key,
-              value: _cursor.value
-            }
-          } else {
-            cursor.currentValue = null
-            cursor.done = true
-          }
-        } else {
-          if (!_cursor) {
-            resolve({})
-            return
-          }
-
-          cursor = {
-            done: false,
+        if (_cursor) {
+          const cursor = {
             direction: _cursor.direction,
             primaryKey: _cursor.primaryKey,
-            currentValue: {
-              key: _cursor.key,
-              value: _cursor.value
-            },
+            key: _cursor.key,
+            value: _cursor.value,
             source
           }
 
-          cursor[Symbol.iterator] = function* () {
-            while (!cursor.done) {
-              yield cursor.currentValue
+          if (!gen) {
+            try {
+              gen = genFn(cursor)
+            } catch (e) {
+              reject(e)
+              return
             }
           }
 
-          resolve(cursor)
+          let result
+          try {
+            // hand the latest item into the generator at the currently paused point
+            result = gen.next(cursor)
+          } catch (e) {
+            reject(e)
+            return
+          }
+
+          if (result.done) {
+            resolve(result.value)
+          } else {
+            _cursor.continue(result.value)
+          }
+        } else {
+          if (!gen) {
+            // if there is no _cursor and gen was never created, we must have zero results
+            resolve()
+            return
+          }
+
+          let result
+          try {
+            // no _cursor, next() with nothing one last time to capture the return value
+            result = gen.next()
+          } catch (e) {
+            reject(e)
+            return
+          }
+
+          if (result.done) {
+            resolve(result.value)
+          } else {
+            // didn't return and didn't ask for anything else, must have yielded again even tho the last yield returned undefined
+            reject(new GeneratorNeverFinishedError())
+          }
         }
       }
     })
