@@ -25,16 +25,16 @@ class Transaction {
     })
     this.db = db
     this.mode = _tx.mode
+    this._tx = _tx
+
     this.objectStoreNames = []
 
-    for (let name of this.objectStoreNames) {
+    for (let name of _tx.objectStoreNames) {
       this.objectStoreNames.push(name)
       if (!this[name]) {
         this[name] = this.objectStore(name)
       }
     }
-
-    this._tx = _tx
   }
 
   abort () {

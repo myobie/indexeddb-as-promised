@@ -4,7 +4,10 @@ class Database {
   constructor (_db) {
     this.name = _db.name
     this.version = _db.version
-    this.objectStoreNames = _db.objectStoreNames
+    this.objectStoreNames = []
+    for (let name of _db.objectStoreNames) {
+      this.objectStoreNames.push(name)
+    }
     this._db = _db
   }
 
@@ -13,6 +16,9 @@ class Database {
   }
 
   transaction (storeNames, mode, genFn) {
+    if (mode === 'r') { mode = 'readonly' }
+    if (mode === 'rw') { mode = 'readwrite' }
+
     const _tx = this._db.transaction(storeNames, mode)
     const tx = new Transaction(_tx, this)
 

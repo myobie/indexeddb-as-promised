@@ -3,12 +3,29 @@ const tape = require('blue-tape')
 
 const dbName = 'test-open'
 
+tape.onFinish(() => idb.deleteDatabase(dbName))
+
 function openDb () {
   return idb.open(dbName, 1, up => {})
 }
 
 tape('isSupported', async t => {
   t.assert(idb.isSupported(), 'isSupported is true')
+})
+
+tape('cmp()', async t => {
+  t.equal(idb.cmp('A', 'B'), -1, 'A is less than B')
+  t.equal(idb.cmp('B', 'A'), 1, 'B is less than A')
+  t.equal(idb.cmp('A', 'A'), 0, 'A is A')
+})
+
+tape('deleteDatabase()', async t => {
+  try {
+    await idb.deleteDatabase(dbName)
+    t.pass('deleted')
+  } catch (e) {
+    t.error(e)
+  }
 })
 
 tape('open() returns a promise', async t => {
@@ -30,20 +47,5 @@ tape('open() resolves to a Database', async t => {
     t.ok(db._db, 'has _db property')
   } finally {
     if (db) { db.close() }
-  }
-})
-
-tape('cmp()', async t => {
-  t.equal(idb.cmp('A', 'B'), -1, 'A is less than B')
-  t.equal(idb.cmp('B', 'A'), 1, 'B is less than A')
-  t.equal(idb.cmp('A', 'A'), 0, 'A is A')
-})
-
-tape('deleteDatabase()', async t => {
-  try {
-    await idb.deleteDatabase(dbName)
-    t.pass('deleted')
-  } catch (e) {
-    t.error(e)
   }
 })
